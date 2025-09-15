@@ -1,123 +1,121 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
-
+        
 model tourist {
-  id                String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  full_name         String?
-  phone_number      String?       @unique
-  email             String?       @unique
-  nationality       String?
-  kyc_data          Json?         @db.JsonB
-  emergency_contact Json?         @db.JsonB
-  safety_score      Int?          @default(100)
-  created_at        DateTime?     @default(now()) @db.Timestamptz(6)
-  itinerary         itinerary[]
-  location_ping     location_ping[]
-  alert             alert[]
-  blockchain_id     blockchain_id[]
-  iot_device        iot_device[]
+  id               String         @id @default(uuid()) @db.Uuid
+  fullName         String
+  phoneNumber      String         @unique
+  email            String?        @unique
+  nationality      String?
+  kycData          Json?          @db.JsonB
+  emergencyContact Json?          @db.JsonB
+  safetyScore      Int            @default(100)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  itineraries      itinerary[]
+  locationPings    location_ping[]
+  alerts           alert[]
+  blockchainId     blockchain_id? // Corrected: One-to-one relation
+  iotDevices       iot_device[]
 }
 
 model itinerary {
-  id         BigInt    @id @default(autoincrement())
-  tourist_id String?   @db.Uuid
-  trip_name  String
-  start_date DateTime  @db.Date
-  end_date   DateTime  @db.Date
-  details    Json?     @db.JsonB
-  created_at DateTime? @default(now()) @db.Timestamptz(6)
-  tourist    tourist?  @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
+  id        BigInt   @id @default(autoincrement())
+  touristId String   @db.Uuid
+  tripName  String
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  details   Json?    @db.JsonB
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  tourist   tourist  @relation(fields: [touristId], references: [id], onDelete: Cascade)
 }
 
 model location_ping {
-  id              BigInt    @id @default(autoincrement())
-  tourist_id      String?   @db.Uuid
-  location        Unsupported("geometry(Point,4326)") // PostGIS types are represented as 'Unsupported'
-  accuracy_meters Float?
-  speed_mps       Float?
-  timestamp       DateTime  @db.Timestamptz(6)
-  tourist         tourist?  @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
+  id             BigInt   @id @default(autoincrement())
+  touristId      String   @db.Uuid
+  location       Unsupported("geometry(Point,4326)")
+  accuracyMeters Float?
+  speedMps       Float?
+  timestamp      DateTime @db.Timestamptz(6)
+  tourist        tourist  @relation(fields: [touristId], references: [id], onDelete: Cascade)
 }
 
 model geofenced_zone {
-  id          Int       @id @default(autoincrement())
-  zone_name   String
-  zone_type   String
-  area        Unsupported("geometry(Polygon,4326)") // PostGIS types are represented as 'Unsupported'
-  is_active   Boolean?  @default(true)
-  created_by  String?   @db.Uuid
-  alert       alert[]
-  authority   authority? @relation(fields: [created_by], references: [id])
+  id        Int       @id @default(autoincrement())
+  zoneName  String
+  zoneType  String
+  area      Unsupported("geometry(Polygon,4326)")
+  isActive  Boolean   @default(true)
+  createdBy String?   @db.Uuid
+  alerts    alert[]
+  creator   authority? @relation("CreatedZones", fields: [createdBy], references: [id])
 }
 
 model alert {
-  id          BigInt      @id @default(autoincrement())
-  tourist_id  String?     @db.Uuid
-  zone_id     Int?
-  alert_type  alert_type
-  status      alert_status? @default(active)
-  location    Unsupported("geometry(Point,4326)")
-  details     Json?       @db.JsonB
-  created_at  DateTime?   @default(now()) @db.Timestamptz(6)
-  resolved_at DateTime?   @db.Timestamptz(6)
-  resolved_by String?     @db.Uuid
-  tourist     tourist?    @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
-  geofenced_zone geofenced_zone? @relation(fields: [zone_id], references: [id])
-  authority   authority?  @relation(fields: [resolved_by], references: [id])
+  id         BigInt       @id @default(autoincrement())
+  touristId  String       @db.Uuid
+  zoneId     Int?
+  alertType  alert_type
+  status     alert_status @default(active)
+  location   Unsupported("geometry(Point,4326)")
+  details    Json?        @db.JsonB
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  resolvedAt DateTime?    @db.Timestamptz(6)
+  resolvedBy String?      @db.Uuid
+  tourist    tourist      @relation(fields: [touristId], references: [id], onDelete: Cascade)
+  zone       geofenced_zone? @relation(fields: [zoneId], references: [id])
+  resolver   authority?   @relation("ResolvedAlerts", fields: [resolvedBy], references: [id])
 }
 
 model authority {
-  id            String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  full_name     String
-  email         String          @unique
-  role          String
-  precinct_id   Int?
-  is_active     Boolean?        @default(true)
-  geofenced_zone geofenced_zone[]
-  alert         alert[]
+  id             String           @id @default(uuid()) @db.Uuid
+  fullName       String
+  email          String           @unique
+  role           String
+  precinctId     Int?
+  isActive       Boolean          @default(true)
+  createdZones   geofenced_zone[] @relation("CreatedZones")
+  resolvedAlerts alert[]          @relation("ResolvedAlerts")
 }
 
 model blockchain_id {
-  id                     BigInt   @id @default(autoincrement())
-  tourist_id             String?  @unique @db.Uuid
-  wallet_address         String   @unique
-  issuance_tx_hash       String   @unique
-  smart_contract_address String
-  issued_at              DateTime @db.Timestamptz(6)
-  expires_at             DateTime @db.Timestamptz(6)
-  tourist                tourist? @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
+  id                   BigInt   @id @default(autoincrement())
+  touristId            String   @unique @db.Uuid
+  walletAddress        String   @unique
+  issuanceTxHash       String   @unique
+  smartContractAddress String
+  issuedAt             DateTime @db.Timestamptz(6)
+  expiresAt            DateTime @db.Timestamptz(6)
+  tourist              tourist  @relation(fields: [touristId], references: [id], onDelete: Cascade)
 }
 
 model iot_device {
-  id            Int           @id @default(autoincrement())
-  device_uid    String        @unique
-  tourist_id    String?       @db.Uuid
-  device_type   String?
-  battery_level Int?
-  last_seen     DateTime?     @db.Timestamptz(6)
-  tourist       tourist?      @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
-  health_vital  health_vital[]
+  id           Int            @id @default(autoincrement())
+  deviceUid    String         @unique
+  touristId    String         @db.Uuid
+  deviceType   String?
+  batteryLevel Int?
+  lastSeen     DateTime?      @db.Timestamptz(6)
+  tourist      tourist        @relation(fields: [touristId], references: [id], onDelete: Cascade)
+  healthVitals health_vital[]
 }
 
 model health_vital {
-  id          BigInt    @id @default(autoincrement())
-  device_id   Int?
-  heart_rate  Int?
-  timestamp   DateTime  @db.Timestamptz(6)
-  iot_device  iot_device? @relation(fields: [device_id], references: [id], onDelete: Cascade)
+  id        BigInt   @id @default(autoincrement())
+  deviceId  Int
+  heartRate Int?
+  timestamp DateTime @db.Timestamptz(6)
+  device    iot_device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
 }
 
 enum alert_type {
