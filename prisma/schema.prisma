@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model tourist {
+  id                String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  full_name         String?
+  phone_number      String?       @unique
+  email             String?       @unique
+  nationality       String?
+  kyc_data          Json?         @db.JsonB
+  emergency_contact Json?         @db.JsonB
+  safety_score      Int?          @default(100)
+  created_at        DateTime?     @default(now()) @db.Timestamptz(6)
+  itinerary         itinerary[]
+  location_ping     location_ping[]
+  alert             alert[]
+  blockchain_id     blockchain_id[]
+  iot_device        iot_device[]
+}
+
+model itinerary {
+  id         BigInt    @id @default(autoincrement())
+  tourist_id String?   @db.Uuid
+  trip_name  String
+  start_date DateTime  @db.Date
+  end_date   DateTime  @db.Date
+  details    Json?     @db.JsonB
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  tourist    tourist?  @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
+}
+
+model location_ping {
+  id              BigInt    @id @default(autoincrement())
+  tourist_id      String?   @db.Uuid
+  location        Unsupported("geometry(Point,4326)") // PostGIS types are represented as 'Unsupported'
+  accuracy_meters Float?
+  speed_mps       Float?
+  timestamp       DateTime  @db.Timestamptz(6)
+  tourist         tourist?  @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
+}
+
+model geofenced_zone {
+  id          Int       @id @default(autoincrement())
+  zone_name   String
+  zone_type   String
+  area        Unsupported("geometry(Polygon,4326)") // PostGIS types are represented as 'Unsupported'
+  is_active   Boolean?  @default(true)
+  created_by  String?   @db.Uuid
+  alert       alert[]
+  authority   authority? @relation(fields: [created_by], references: [id])
+}
+
+model alert {
+  id          BigInt      @id @default(autoincrement())
+  tourist_id  String?     @db.Uuid
+  zone_id     Int?
+  alert_type  alert_type
+  status      alert_status? @default(active)
+  location    Unsupported("geometry(Point,4326)")
+  details     Json?       @db.JsonB
+  created_at  DateTime?   @default(now()) @db.Timestamptz(6)
+  resolved_at DateTime?   @db.Timestamptz(6)
+  resolved_by String?     @db.Uuid
+  tourist     tourist?    @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
+  geofenced_zone geofenced_zone? @relation(fields: [zone_id], references: [id])
+  authority   authority?  @relation(fields: [resolved_by], references: [id])
+}
+
+model authority {
+  id            String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  full_name     String
+  email         String          @unique
+  role          String
+  precinct_id   Int?
+  is_active     Boolean?        @default(true)
+  geofenced_zone geofenced_zone[]
+  alert         alert[]
+}
+
+model blockchain_id {
+  id                     BigInt   @id @default(autoincrement())
+  tourist_id             String?  @unique @db.Uuid
+  wallet_address         String   @unique
+  issuance_tx_hash       String   @unique
+  smart_contract_address String
+  issued_at              DateTime @db.Timestamptz(6)
+  expires_at             DateTime @db.Timestamptz(6)
+  tourist                tourist? @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
+}
+
+model iot_device {
+  id            Int           @id @default(autoincrement())
+  device_uid    String        @unique
+  tourist_id    String?       @db.Uuid
+  device_type   String?
+  battery_level Int?
+  last_seen     DateTime?     @db.Timestamptz(6)
+  tourist       tourist?      @relation(fields: [tourist_id], references: [id], onDelete: Cascade)
+  health_vital  health_vital[]
+}
+
+model health_vital {
+  id          BigInt    @id @default(autoincrement())
+  device_id   Int?
+  heart_rate  Int?
+  timestamp   DateTime  @db.Timestamptz(6)
+  iot_device  iot_device? @relation(fields: [device_id], references: [id], onDelete: Cascade)
+}
+
+enum alert_type {
+  panic
+  geofence_entry
+  inactivity
+  ai_anomaly
+  health_vital
+}
+
+enum alert_status {
+  active
+  acknowledged
+  resolved
+  false_alarm
+}
