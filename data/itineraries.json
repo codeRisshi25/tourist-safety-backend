@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "trip_name": "Quick Test",
+    "start_date": "2025-10-01",
+    "end_date": "2025-10-02",
+    "safety_score": 100,
+    "locations": [
+      {
+        "day": 1,
+        "name": "Kaziranga National Park",
+        "latitude": 26.6581046,
+        "longitude": 93.3927441
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "trip_name": "Quick Test",
+    "start_date": "2025-10-01",
+    "end_date": "2025-10-02",
+    "safety_score": 100,
+    "locations": [
+      {
+        "day": 1,
+        "name": "Kaziranga National Park",
+        "latitude": 26.6581046,
+        "longitude": 93.3927441
+      }
+    ]
+  }
+]
