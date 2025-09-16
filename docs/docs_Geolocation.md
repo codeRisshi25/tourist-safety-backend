@@ -121,22 +121,3 @@ This document details the geolocation backend for the Tourist Safety project, in
 
 ---
 
-## 9. References
-
-- Prisma schema: `prisma/schema.prisma`
-- Location ping service: `services/locationService.js`
-- Emergency service: `services/emergencyService.js`
-- WebSocket: `socket/socketService.js`
-- Auth middleware: `middleware/auth.js`
-- Example controller: `controllers/locationController.js`
-
----
-
-## 10. Contact
-
-- Maintainer: (add name/email)
-- Date: 2025-09-16
-
----
-
-_End of geolocation backend documentation._
