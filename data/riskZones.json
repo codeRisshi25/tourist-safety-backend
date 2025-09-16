@@ -1,37 +1,24 @@
-[[
-
-  {  {
-
-    "id": 1,    "id": 1,
-
-    "zone_name": "Sample Landslide Area",    "zone_name": "Sample Landslide Area",
-
-    "risk_level": 7,    "risk_level": 7,
-
-    "is_restricted": false,    "is_restricted": false,
-
-    "polygon": [    "polygon": [
-
-      { "lat": 26.7000, "lon": 93.3000 },      { "lat": 26.7000, "lon": 93.3000 },
-
-      { "lat": 26.7050, "lon": 93.3200 },      { "lat": 26.7050, "lon": 93.3200 },
-
-      { "lat": 26.6900, "lon": 93.3300 }      { "lat": 26.6900, "lon": 93.3300 }
-
-    ]    ]
-
-  }  },
-
-]  {
-
-    "id": 2,
-    "zone_name": "Restricted Military Zone",
-    "risk_level": 10,
-    "is_restricted": true,
+[
+  {
+    "id": 1,
+    "zoneName": "Sample Landslide Area",
+    "riskLevel": 7,
+    "isRestricted": false,
     "polygon": [
-      { "lat": 26.6600, "lon": 93.3500 },
-      { "lat": 26.6650, "lon": 93.3600 },
-      { "lat": 26.6550, "lon": 93.3650 }
+      { "lat": 26.7, "lon": 93.3 },
+      { "lat": 26.705, "lon": 93.32 },
+      { "lat": 26.69, "lon": 93.33 }
+    ]
+  },
+  {
+    "id": 2,
+    "zoneName": "Restricted Military Zone",
+    "riskLevel": 10,
+    "isRestricted": true,
+    "polygon": [
+      { "lat": 26.66, "lon": 93.35 },
+      { "lat": 26.665, "lon": 93.36 },
+      { "lat": 26.655, "lon": 93.365 }
     ]
   }
 ]
