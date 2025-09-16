@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "touristId": "11111111-1111-1111-1111-111111111111",
+    "latitude": 26.6581046,
+    "longitude": 93.3927441,
+    "alertType": "panic",
+    "status": "active",
+    "timestamp": "2025-09-16T12:35:00.000Z"
+  },
+  {
+    "id": 2,
+    "touristId": "22222222-2222-2222-2222-222222222222",
+    "latitude": 26.7,
+    "longitude": 93.3,
+    "alertType": "geofence_entry",
+    "status": "resolved",
+    "timestamp": "2025-09-16T12:45:00.000Z"
+  }
+]
