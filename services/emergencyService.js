@@ -1,22 +1,22 @@
 // Service for handling emergency (panic) activation
 
-import prisma from "../prisma/client.js";
+import { Alert } from '../models';
 
 class EmergencyService {
   // Keep DB persistence available as an explicit helper if needed later.
   static async persistPanic(touristId, initialLocation) {
     const { latitude, longitude } = initialLocation;
-    const point = `SRID=4326;POINT(${longitude} ${latitude})`;
+    const location = {
+      type: 'Point',
+      coordinates: [longitude, latitude],
+      crs: { type: 'name', properties: { name: 'EPSG:4326' } }
+    };
 
-    return await prisma.$transaction(async (tx) => {
-      const query = `
-        INSERT INTO alert ("touristId", "alertType", status, location, "createdAt")
-        VALUES ($1, 'panic', 'active', ST_GeomFromText($2), NOW())
-        RETURNING *
-      `;
-      const params = [touristId, point];
-      const result = await tx.$queryRawUnsafe(query, ...params);
-      return result[0];
+    return await Alert.create({
+      touristId,
+      alertType: 'panic',
+      status: 'active',
+      location
     });
   }
 }

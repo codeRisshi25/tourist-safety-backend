@@ -1,10 +1,14 @@
-import express from 'express';
-import exampleController from '../controllers/exampleController.js';
-import itineraryController from '../controllers/itineraryController.js';
+import { Router } from 'express';
+import authRoutes from './authRoutes.js';
+import emergencyRoutes from './emergencyRoutes.js';
+import itineraryRoutes from './itineraryRoutes.js';
+import locationRoutes from './locationRoutes.js';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/example', exampleController.getExample);
-router.post('/itineraries', itineraryController.postItinerary);
+router.use('/auth', authRoutes);
+router.use('/emergency', emergencyRoutes);
+router.use('/itineraries', itineraryRoutes);
+router.use('/location', locationRoutes);
 
 export default router;

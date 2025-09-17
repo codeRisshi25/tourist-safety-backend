@@ -1,6 +1,6 @@
 // Service for handling location pings using raw PostGIS queries
 
-import prisma from "../prisma/client.js";
+import { LocationPing } from '../models';
 
 class LocationService {
   static async createLocationPing(data) {
@@ -13,25 +13,21 @@ class LocationService {
       timestamp,
     } = data;
 
-    const point = `SRID=4326;POINT(${longitude} ${latitude})`;
+    const location = {
+      type: 'Point',
+      coordinates: [longitude, latitude],
+      crs: { type: 'name', properties: { name: 'EPSG:4326' } }
+    };
 
-    // Use raw SQL to insert geospatial data with camelCase field names
-    const query = `
-      INSERT INTO location_ping ("touristId", location, "accuracyMeters", "speedMps", "timestamp")
-      VALUES ($1, ST_GeomFromText($2), $3, $4, $5)
-      RETURNING id
-    `;
-
-    const params = [
+    const result = await LocationPing.create({
       touristId,
-      point,
-      accuracyMeters ?? null,
-      speedMps ?? null,
+      location,
+      accuracyMeters,
+      speedMps,
       timestamp,
-    ];
+    });
 
-    const result = await prisma.$queryRawUnsafe(query, ...params);
-    return result[0];
+    return result;
   }
 }
 

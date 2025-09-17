@@ -1,6 +1,6 @@
-import { readJson, writeJson } from '../utils/jsonDb.js';
 import { pointInPolygon } from '../utils/geo.js';
 import { getCoordinatesForLocation } from './geo/geocodingService.js';
+import { Itinerary, GeofencedZone } from '../models';
 
 function validateItineraryPayload(body) {
   const requiredRoot = ['trip_name', 'start_date', 'end_date', 'days'];
@@ -35,8 +35,7 @@ function computeSafetyScore(geocodedLocations, riskZones) {
 export async function createItinerary(data) {
   validateItineraryPayload(data);
 
-  const riskZones = readJson('riskZones.json');
-  const itineraries = readJson('itineraries.json');
+  const riskZones = await GeofencedZone.findAll();
 
   const geocodedLocations = [];
 
@@ -60,19 +59,14 @@ export async function createItinerary(data) {
   }
 
   const safety_score = computeSafetyScore(geocodedLocations, riskZones);
-  const newId = itineraries.length ? Math.max(...itineraries.map(i => i.id || 0)) + 1 : 1;
 
-  const itineraryRecord = {
-    id: newId,
-    trip_name: data.trip_name,
-    start_date: data.start_date,
-    end_date: data.end_date,
-    safety_score,
-    locations: geocodedLocations
-  };
-
-  itineraries.push(itineraryRecord);
-  writeJson('itineraries.json', itineraries);
+  const itineraryRecord = await Itinerary.create({
+    tripName: data.trip_name,
+    startDate: data.start_date,
+    endDate: data.end_date,
+    safetyScore: safety_score,
+    details: { locations: geocodedLocations }
+  });
 
   return itineraryRecord;
 }

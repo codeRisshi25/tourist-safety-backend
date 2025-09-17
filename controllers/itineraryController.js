@@ -1,13 +1,44 @@
-import { createItinerary } from '../services/itineraryService.js';
+import itineraryService from '../services/itineraryService.js';
+import { Itinerary } from '../models';
 
-export async function postItinerary(req, res) {
+const createItinerary = async (req, res, next) => {
   try {
-    const itinerary = await createItinerary(req.body);
-    res.status(201).json({ success: true, itinerary });
-  } catch (e) {
-    res.status(400).json({ success: false, error: e.message });
+    const itinerary = await itineraryService.createItinerary({
+      ...req.body,
+      touristId: req.user.id,
+    });
+    res.status(201).json(itinerary);
+  } catch (error) {
+    next(error);
   }
-}
+};
 
-export default { postItinerary };
+const getItineraries = async (req, res, next) => {
+  try {
+    const itineraries = await Itinerary.findAll({ where: { touristId: req.user.id } });
+    res.json(itineraries);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getItineraryById = async (req, res, next) => {
+  try {
+    const itinerary = await Itinerary.findOne({
+      where: { id: req.params.id, touristId: req.user.id },
+    });
+    if (!itinerary) {
+      return res.status(404).json({ error: 'Itinerary not found' });
+    }
+    res.json(itinerary);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default {
+  createItinerary,
+  getItineraries,
+  getItineraryById,
+};
 
