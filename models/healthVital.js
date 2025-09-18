@@ -1,39 +1,54 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model, DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class HealthVital extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       // define association here
-      HealthVital.belongsTo(models.IotDevice, { foreignKey: 'deviceId' });
     }
   }
   HealthVital.init({
     id: {
-      type: DataTypes.BIGINT,
-      primaryKey: true,
-      autoIncrement: true
-    },
-    deviceId: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
     },
-    heartRate: DataTypes.INTEGER,
+    touristId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Tourists',
+        key: 'id',
+      },
+    },
+    heartRate: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    bodyTemperature: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    bloodPressure: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     timestamp: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: false,
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     }
   }, {
     sequelize,
     modelName: 'HealthVital',
-    tableName: 'health_vitals',
-    timestamps: false
+    tableName: 'HealthVitals',
   });
   return HealthVital;
 };

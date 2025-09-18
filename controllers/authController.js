@@ -1,4 +1,5 @@
-import { Tourist } from '../models';
+import db from '../models/index.js';
+const { Tourist } = db;
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 

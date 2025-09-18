@@ -1,50 +1,51 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model, DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class Authority extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       // define association here
-      Authority.hasMany(models.GeofencedZone, { as: 'createdZones', foreignKey: 'createdBy' });
-      Authority.hasMany(models.Alert, { as: 'resolvedAlerts', foreignKey: 'resolvedBy' });
     }
   }
   Authority.init({
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.INTEGER,
       primaryKey: true,
-      allowNull: false
+      autoIncrement: true,
+      allowNull: false,
     },
-    fullName: {
+    name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
+      allowNull: false,
       unique: true,
-      allowNull: false
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     role: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
-    precinctId: DataTypes.INTEGER,
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true
+    jurisdiction: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     }
   }, {
     sequelize,
     modelName: 'Authority',
-    tableName: 'authorities',
-    timestamps: true
+    tableName: 'Authorities',
   });
   return Authority;
 };

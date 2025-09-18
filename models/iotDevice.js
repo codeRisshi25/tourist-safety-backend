@@ -1,43 +1,51 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
+import { Model, DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class IotDevice extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       // define association here
-      IotDevice.belongsTo(models.Tourist, { foreignKey: 'touristId' });
-      IotDevice.hasMany(models.HealthVital, { foreignKey: 'deviceId' });
     }
   }
   IotDevice.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
-    },
-    deviceUid: {
-      type: DataTypes.STRING,
-      unique: true,
-      allowNull: false
+      autoIncrement: true,
+      allowNull: false,
     },
     touristId: {
-      type: DataTypes.UUID,
-      allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Tourists',
+        key: 'id',
+      },
     },
-    deviceType: DataTypes.STRING,
-    batteryLevel: DataTypes.INTEGER,
-    lastSeen: DataTypes.DATE
+    deviceId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    deviceType: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    }
   }, {
     sequelize,
     modelName: 'IotDevice',
-    tableName: 'iot_devices',
-    timestamps: true
+    tableName: 'IotDevices',
   });
   return IotDevice;
 };
