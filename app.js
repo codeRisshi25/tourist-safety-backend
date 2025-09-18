@@ -1,11 +1,14 @@
-const cors = require("cors");
 const dotenv = require("dotenv");
+dotenv.config();
+
+const { Client } = require('pg');
+Client.prototype.family = 4;
+
+const cors = require("cors");
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const db = require("./models/index.js");
 const { sequelize } = db;
-
-dotenv.config();
 
 const app = express();
 
