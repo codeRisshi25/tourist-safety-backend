@@ -1,5 +1,5 @@
 const db = require('../models/index.js');
-const { Tourist } = db;
+const { Tourist , Authority } = db;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
@@ -55,31 +55,50 @@ const authController = {
         return res.status(400).json({ error: 'Email and password are required.' });
       }
 
+      // Try to find a Tourist first
       const tourist = await Tourist.findOne({ where: { email } });
 
-      if (!tourist) {
-        return res.status(401).json({ error: 'Authentication failed: User not found' });
+      if (tourist) {
+        const isPasswordValid = await bcrypt.compare(password, tourist.password);
+        if (!isPasswordValid) {
+          return res.status(401).json({ error: 'Authentication failed' });
+        }
+
+        const token = jwt.sign({ id: tourist.id, role: 'tourist' }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+        res.cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 24 * 60 * 60 * 1000
+        });
+
+        return res.json({ message: 'Tourist logged in successfully' });
       }
 
-      const isPasswordValid = await bcrypt.compare(password, tourist.password);
+      // If not a Tourist, try Authority
+      const authority = await Authority.findOne({ where: { email } });
+      if (authority) {
+        const isPasswordValid = await bcrypt.compare(password, authority.password);
+        if (!isPasswordValid) {
+          return res.status(401).json({ error: 'Authentication failed' });
+        }
 
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: 'Authentication failed: Invalid password' });
+        const token = jwt.sign({ id: authority.id, role: 'authority' }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+        res.cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 24 * 60 * 60 * 1000
+        });
+
+        return res.json({ message: 'Authority logged in successfully' });
       }
 
-      // Generate token
-      const token = jwt.sign({ id: tourist.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-
-      // Set token in a secure, http-only cookie
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-        sameSite: 'strict',
-        maxAge: 24 * 60 * 60 * 1000 // 1 day
-      });
-
-      res.json({ message: 'Logged in successfully' });
-    } catch (error) {
+      // No user found
+      return res.status(401).json({ error: 'Authentication failed' });
+        } catch (error) {
       next(error);
     }
   },
