@@ -1,6 +1,6 @@
-import { Model, DataTypes } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
-export default (sequelize) => {
+module.exports = (sequelize) => {
   class Tourist extends Model {
     static associate(models) {
       // define association here
@@ -34,11 +34,21 @@ export default (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    passportId: {
+    kycId: {
       type: DataTypes.STRING,
       allowNull: true,
       unique: true,
     },
+    emergencyContact: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    safetyScore: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 100,
+    },
+
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE
@@ -50,7 +60,7 @@ export default (sequelize) => {
   }, {
     sequelize,
     modelName: 'Tourist',
-    tableName: 'Tourists',
+    tableName: 'tourists',
   });
   return Tourist;
 };

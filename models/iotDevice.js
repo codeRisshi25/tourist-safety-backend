@@ -1,6 +1,6 @@
-import { Model, DataTypes } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
-export default (sequelize) => {
+module.exports = (sequelize) => {
   class IotDevice extends Model {
     static associate(models) {
       // define association here
@@ -17,7 +17,7 @@ export default (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Tourists',
+        model: 'tourists',
         key: 'id',
       },
     },
@@ -45,7 +45,7 @@ export default (sequelize) => {
   }, {
     sequelize,
     modelName: 'IotDevice',
-    tableName: 'IotDevices',
+    tableName: 'iot_devices',
   });
   return IotDevice;
 };

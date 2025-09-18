@@ -1,13 +1,13 @@
-import db from '../models/index.js';
+const db = require('../models/index.js');
 const { Tourist } = db;
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const authController = {
   // --- REGISTER A NEW USER ---
   register: async (req, res, next) => {
     try {
-      const { fullName, phoneNumber, email, password } = req.body;
+      const { fullName, phoneNumber, email, password , nationality , } = req.body;
 
       if (!fullName || !phoneNumber || !password || !email) {
         return res.status(400).json({ error: 'All fields are required.' });
@@ -81,4 +81,4 @@ const authController = {
   },
 };
 
-export default authController;
+module.exports = authController;
