@@ -34,7 +34,7 @@ This document details the geolocation backend for the Tourist Safety project, in
   - `POST /api/emergency/activate` — Activates a panic alert. Per current design this endpoint does NOT persist the emergency to the database; instead it emits a real-time `emergency:update` message to connected authority dashboards (Socket.IO `authorities` room).
   - WebSocket: `emergency:ping` — For real-time emergency streaming from tourists: the server emits `emergency:update` to authorities and does NOT persist the emergency ping to the DB.
 - **Business Logic & Conventions:**
-  - Regular pings are persisted using raw SQL / Prisma helpers and PostGIS: `ST_GeomFromText('POINT(lon lat)', 4326)`.
+  - Regular pings are persisted using raw SQL / Prisma helpers and PostGIS: prefer `ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)` (numeric parameters) and Prisma tagged-template `prisma.$queryRaw`/`tx.$queryRaw` for safe parameterization instead of building WKT strings.
   - Emergency flows are emit-only (no automatic DB persistence) to satisfy requirement: emergency data should go directly to authority dashboards.
   - DB persistence for emergencies remains available via an explicit helper `EmergencyService.persistPanic()` but it is not called by default.
 - **Schema & Field Names:**
@@ -120,4 +120,3 @@ This document details the geolocation backend for the Tourist Safety project, in
 - Emergency events are emit-only; if you want an audit trail, call `EmergencyService.persistPanic()` explicitly from the controller or log to an append-only store.
 
 ---
-

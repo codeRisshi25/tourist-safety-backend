@@ -6,17 +6,17 @@ class EmergencyService {
   // Keep DB persistence available as an explicit helper if needed later.
   static async persistPanic(touristId, initialLocation) {
     const { latitude, longitude } = initialLocation;
-    const point = `SRID=4326;POINT(${longitude} ${latitude})`;
+    if (typeof latitude !== "number" || typeof longitude !== "number") {
+      throw new Error("latitude and longitude must be numbers");
+    }
 
     return await prisma.$transaction(async (tx) => {
-      const query = `
+      const inserted = await tx.$queryRaw`
         INSERT INTO alert ("touristId", "alertType", status, location, "createdAt")
-        VALUES ($1, 'panic', 'active', ST_GeomFromText($2), NOW())
-        RETURNING *
+        VALUES (${touristId}, 'panic', 'active', ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), NOW())
+        RETURNING *, ST_X(location) AS longitude, ST_Y(location) AS latitude
       `;
-      const params = [touristId, point];
-      const result = await tx.$queryRawUnsafe(query, ...params);
-      return result[0];
+      return inserted[0];
     });
   }
 }

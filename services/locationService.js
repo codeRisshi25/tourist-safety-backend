@@ -13,24 +13,22 @@ class LocationService {
       timestamp,
     } = data;
 
-    const point = `SRID=4326;POINT(${longitude} ${latitude})`;
+    // Basic validation
+    if (typeof latitude !== "number" || typeof longitude !== "number") {
+      throw new Error("latitude and longitude must be numbers");
+    }
 
-    // Use raw SQL to insert geospatial data with camelCase field names
-    const query = `
+    // Use ST_SetSRID(ST_MakePoint(lon, lat), 4326) with parameterized template
+    // Return numeric coordinates (ST_X/ST_Y) which are easier for clients to consume
+    const result = await prisma.$queryRaw`
       INSERT INTO location_ping ("touristId", location, "accuracyMeters", "speedMps", "timestamp")
-      VALUES ($1, ST_GeomFromText($2), $3, $4, $5)
-      RETURNING id
+      VALUES (${touristId}, ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), ${
+      accuracyMeters ?? null
+    }, ${speedMps ?? null}, ${timestamp})
+      RETURNING id, ST_X(location) AS longitude, ST_Y(location) AS latitude
     `;
 
-    const params = [
-      touristId,
-      point,
-      accuracyMeters ?? null,
-      speedMps ?? null,
-      timestamp,
-    ];
-
-    const result = await prisma.$queryRawUnsafe(query, ...params);
+    // prisma.$queryRaw tagged templates return an array of rows
     return result[0];
   }
 }
