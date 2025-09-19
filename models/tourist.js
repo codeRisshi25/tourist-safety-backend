@@ -40,13 +40,18 @@ module.exports = (sequelize) => {
       unique: true,
     },
     emergencyContact: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: true,
     },
     safetyScore: {
         type: DataTypes.INTEGER,
         allowNull: true,
         defaultValue: 100,
+    },
+    isFirstTimeLogin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      allowNull: false,
     },
 
     createdAt: {

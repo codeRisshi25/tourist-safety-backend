@@ -64,6 +64,15 @@ const authController = {
           return res.status(401).json({ error: 'Authentication failed' });
         }
 
+        // If it's the first time login, send a confirmation and don't issue a token yet
+        if (tourist.isFirstTimeLogin) {
+          return res.status(200).json({
+            message: 'OTP verified. Please reset your password.',
+            isFirstTimeLogin: true,
+            touristId: tourist.id,
+          });
+        }
+
         const token = jwt.sign({ id: tourist.id, role: 'tourist' }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         res.cookie('token', token, {
@@ -99,6 +108,33 @@ const authController = {
       // No user found
       return res.status(401).json({ error: 'Authentication failed' });
         } catch (error) {
+      next(error);
+    }
+  },
+
+  resetPassword: async (req, res, next) => {
+    try {
+      const { touristId, newPassword } = req.body;
+
+      if (!touristId || !newPassword) {
+        return res.status(400).json({ error: 'Tourist ID and new password are required.' });
+      }
+
+      const tourist = await Tourist.findByPk(touristId);
+      if (!tourist) {
+        return res.status(404).json({ error: 'Tourist not found.' });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      await tourist.update({
+        password: hashedPassword,
+        isFirstTimeLogin: false,
+      });
+
+      res.status(200).json({ message: 'Password has been reset successfully.' });
+    } catch (error) {
       next(error);
     }
   },
