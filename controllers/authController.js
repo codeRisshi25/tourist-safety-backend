@@ -113,18 +113,28 @@ const authController = {
   // --- GET USER PROFILE ---
   getProfile: async (req, res, next) => {
     try {
-      // The user ID is attached to req by the auth middleware
-      const tourist = await Tourist.findByPk(req.user.id, {
-        attributes: { exclude: ['password'] },
-      });
-      if (!tourist) {
+      const { id, role } = req.user;
+
+      let userProfile;
+      if (role === 'tourist') {
+        userProfile = await Tourist.findByPk(id, {
+          attributes: { exclude: ['password'] }
+        });
+      } else if (role === 'authority') {
+        userProfile = await Authority.findByPk(id, {
+          attributes: { exclude: ['password'] }
+        });
+      }
+
+      if (!userProfile) {
         return res.status(404).json({ error: 'User not found' });
       }
-      res.json(tourist);
+
+      res.json(userProfile);
     } catch (error) {
       next(error);
     }
-  },
+  }
 };
 
 module.exports = authController;
