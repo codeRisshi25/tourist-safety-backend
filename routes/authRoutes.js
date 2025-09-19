@@ -5,7 +5,7 @@ const registerationController = require('../controllers/registrationController.j
 
 const router = Router();
 
-router.post('/register', authenticateToken , registerationController.registerTourist);
+router.post('/register/tourist', authenticateToken , registerationController.registerTourist);
 router.post('/login', authController.login);
 router.post('/logout', authController.logout);
 router.get('/profile', authenticateToken, authController.getProfile);

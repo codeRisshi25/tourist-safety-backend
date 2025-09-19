@@ -1,18 +1,17 @@
 const db = require("../models/index.js");
-const { Tourist, Authority, Itinerary, BlockchainId } = db; // Added BlockchainId
+const { Tourist, Authority, Itinerary, BlockchainId } = db;
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const {
   registerTouristOnBlockchain,
-} = require("../service/blockchainService.js"); // Import the service
+} = require("../service/blockchainService.js");
+const { geocodeItineraryDetails } = require("../service/GeocodingService.js");
 
 const registrationController = {
-  // ----REGISTER A NEW TOURIST ----
   registerTourist: async (req, res, next) => {
     try {
       const { role } = req.user;
-      if (role !== "admin") {
+      if (role !== "authority") {
         return res
           .status(403)
           .json({ error: "Access denied. Authorities only." });
@@ -26,46 +25,39 @@ const registrationController = {
         nationality,
         kycId,
         emergencyContact,
-        itineraries,
+        itinerary, // Changed to a single object
       } = req.body;
 
-      // Require itineraries for creating a tourist
-      if (!Array.isArray(itineraries) || itineraries.length === 0) {
+      // --- MODIFIED: Check for a single itinerary object ---
+      if (!itinerary || typeof itinerary !== "object") {
         return res
           .status(400)
-          .json({ error: "Itineraries are required to create a tourist." });
+          .json({ error: "A single itinerary object is required." });
       }
 
       // Basic validation
-      if (!name || !email || !password) {
+      if (!name || !email || !password || !phone) {
         return res.status(400).json({
-          error: "Missing required tourist fields: name, email or password.",
+          error: "Missing required fields: name, email, password, or phone.",
         });
-      }
-
-      // Prevent huge payloads
-      if (itineraries.length > 200) {
-        return res
-          .status(413)
-          .json({ error: "Too many itineraries in one request." });
       }
 
       // Check existing user
       const existing = await Tourist.findOne({
-        where: {
-          [Op.or]: [{ email }, { phone }],
-        },
+        where: { [Op.or]: [{ email }, { phone }] },
       });
       if (existing) {
         return res
           .status(409)
-          .json({ error: "User with this email or phone number already exists." });
+          .json({ error: "User with this email or phone already exists." });
       }
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      // Atomic create tourist, itineraries, and blockchain ID
+      // --- MODIFIED: Geocode the itinerary details before the transaction ---
+      const geocodedDetails = await geocodeItineraryDetails(itinerary.details);
+
       const result = await db.sequelize.transaction(async (t) => {
         // 1. Create the tourist
         const tourist = await Tourist.create(
@@ -77,25 +69,28 @@ const registrationController = {
             nationality,
             kycId,
             emergencyContact,
+            safetyScore: 100, // Default safety score
           },
           { transaction: t }
         );
 
-        // 2. Create the itineraries
-        const rows = itineraries.map((it) => ({
-          touristId: tourist.id,
-          tripName: it.tripName || it.trip_name || it.trip || null,
-          startDate: it.startDate || it.start_date || it.start || null,
-          endDate: it.endDate || it.end_date || it.end || null,
-          details: it.details || it.days || null,
-        }));
+        // 2. Create the single itinerary with geocoded details
+        // FIX: Ensure the 'details' field is correctly assigned.
+        await Itinerary.create(
+          {
+            touristId: tourist.id,
+            tripName: itinerary.tripName,
+            startDate: itinerary.startDate,
+            endDate: itinerary.endDate,
+            details: geocodedDetails, // The geocoded object is now correctly assigned
+          },
+          { transaction: t }
+        );
 
-        await Itinerary.bulkCreate(rows, { transaction: t });
-
-        // 3. Register on blockchain and get the transaction hash
+        // 3. Register on blockchain
         const blockchainTxHash = await registerTouristOnBlockchain(tourist);
 
-        // 4. Save the blockchain ID to the database
+        // 4. Save the blockchain ID
         await BlockchainId.create(
           {
             touristId: tourist.id,
@@ -107,18 +102,15 @@ const registrationController = {
         return tourist;
       });
 
-      // Do not return password
       const { id } = result;
       return res.status(201).json({
-        message: "Tourist, itineraries, and blockchain ID created successfully.",
+        message: "Tourist, itinerary, and blockchain ID created successfully.",
         touristId: id,
       });
     } catch (err) {
-      // The transaction will automatically roll back on error
       next(err);
     }
   },
-  // ...existing code...
 };
 
 module.exports = registrationController;

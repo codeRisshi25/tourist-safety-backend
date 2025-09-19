@@ -1,16 +1,16 @@
-const { ethers } = require("ethers");
+const { ethers, JsonRpcProvider, Wallet } = require("ethers"); // Changed import
 const crypto = require("crypto");
 const contractABI = require("./TouristRegistry.json").abi;
 require("dotenv").config();
 
 // -- config --
-const GANACHE_URL = process.env.GANACHE_URL;
+const GANACHE_URL = process.env.GANACHE_PROVIDER_URL;
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 // Initialize
-const provider = new ethers.providers.JsonRpcProvider(GANACHE_URL);
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+const provider = new JsonRpcProvider(GANACHE_URL); // Changed instantiation
+const wallet = new Wallet(PRIVATE_KEY, provider); // Changed instantiation
 const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, wallet);
 
 // ye name , id aur phone number se hash banayega
@@ -29,7 +29,8 @@ const registerTouristOnBlockchain = async (touristData) => {
     console.log(
       `Issuing ID for Tourist DB ID: ${touristData.id} with hash: ${dataHash}`
     );
-    const tx = await contract.issueId(tourist.id, dataHash);
+    const touristId = String(touristData.id);
+    const tx = await contract.issueId(touristId, dataHash);
     const receipt = await tx.wait();
     console.log(`Tourist registered on blockchain with hash: ${dataHash}`);
     return receipt.hash; // yahi uski blockchain id hai

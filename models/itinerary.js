@@ -62,7 +62,7 @@ module.exports = (sequelize) => {
       modelName: "Itinerary",
       tableName: "itineraries",
       underscored: true,
-      timestamps: false,
+      timestamps: true,
     }
   );
 
