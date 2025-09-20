@@ -80,7 +80,7 @@ const registrationController = {
             nationality,
             kycId,
             emergencyContact,
-            safetyScore: safetyScore, // Calculated safety score
+            safetyScore: safetyScore.totalScore, // Calculated safety score
             isFirstTimeLogin: true,
           },
           { transaction: t }
@@ -128,6 +128,7 @@ const registrationController = {
         message:
           "Tourist, itinerary, and blockchain ID created successfully. OTP sent to email.",
         touristId: id,
+        safetyScoreDetails: safetyScore, // Include breakdown for client
       });
     } catch (err) {
       next(err);

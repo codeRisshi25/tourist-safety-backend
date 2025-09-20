@@ -44,13 +44,16 @@ async function runTest() {
   const safetyScore = calculateSafetyScore(sampleGeocodedDetails);
 
   console.log("\n--- Safety Score Calculation Complete ---");
-  console.log(`Final Safety Score: ${safetyScore}`);
+  console.log(`Final Safety Score: ${safetyScore.totalScore}`);
+  console.log("Breakdown:", JSON.stringify(safetyScore.breakdown, null, 2));
+  console.log("Summary:", JSON.stringify(safetyScore.summary, null, 2));
 
-  // Expected: Day 1: 0 (geofenced), Day 2: 60, Day 3: 125->100, Day 4: 100; Average ~66, but geofenced day pulls to 0? Wait, no: since geofenced sets day to 0, average of 0,60,100,100 = 65
-  // But in code, if hasGeofenced, dayScore=0, so yes.
-  console.log("\nExpected: Around 65 due to geofenced day averaging down.");
-
-  // Test safe itinerary
+  // Expected: Around 65 due to geofenced day averaging down.
+  if (safetyScore.totalScore === 65) {
+    console.log("\n✅ Test Result: SUCCESS - Score and breakdown correct.");
+  } else {
+    console.log("\n❌ Test Result: FAILED - Expected 65.");
+  }
   const safeDetails = {
     days: [
       {
@@ -64,7 +67,7 @@ async function runTest() {
   };
 
   const safeScore = calculateSafetyScore(safeDetails);
-  console.log(`Safe Itinerary Score: ${safeScore}`); // Expected: 100
+  console.log(`Safe Itinerary Score: ${safeScore.totalScore}`); // Expected: 100
 
   // Test risk itinerary
   const riskDetails = {
@@ -74,7 +77,7 @@ async function runTest() {
   };
 
   const riskScore = calculateSafetyScore(riskDetails);
-  console.log(`Risk Itinerary Score: ${riskScore}`); // Expected: 60
+  console.log(`Risk Itinerary Score: ${riskScore.totalScore}`); // Expected: 60
 
   // Test geofenced
   const geoDetails = {
@@ -84,7 +87,7 @@ async function runTest() {
   };
 
   const geoScore = calculateSafetyScore(geoDetails);
-  console.log(`Geofenced Itinerary Score: ${geoScore}`); // Expected: 0
+  console.log(`Geofenced Itinerary Score: ${geoScore.totalScore}`); // Expected: 0
 }
 
 runTest();
