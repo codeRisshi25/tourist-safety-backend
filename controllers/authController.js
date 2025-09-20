@@ -170,6 +170,35 @@ const authController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  // --- GET SAFETY DETAILS FOR A TOURIST ---
+  getSafetyDetails: async (req, res, next) => {
+    try {
+      const { touristId } = req.params;
+      const { id: userId, role } = req.user;
+
+      // Allow authorities or the tourist themselves
+      if (role !== 'authority' && userId !== parseInt(touristId)) {
+        return res.status(403).json({ error: 'Access denied.' });
+      }
+
+      const tourist = await Tourist.findByPk(touristId, {
+        attributes: ['id', 'name', 'safetyDetails']
+      });
+
+      if (!tourist) {
+        return res.status(404).json({ error: 'Tourist not found.' });
+      }
+
+      res.status(200).json({
+        touristId: tourist.id,
+        name: tourist.name,
+        safetyDetails: tourist.safetyDetails
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 };
 

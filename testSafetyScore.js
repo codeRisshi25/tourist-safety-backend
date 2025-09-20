@@ -26,8 +26,8 @@ async function runTest() {
         location: "Eiffel Tower, Paris",
         latitude: 48.8584,
         longitude: 2.2945,
-        notes: "Tourist spot",
-      }, // Within 0.5km of Eiffel Tower Area -> +25
+        notes: "Low-risk area",
+      }, // Within 0.5km of Eiffel Tower Area -> -10
       {
         day: 4,
         location: "Safe Place",
@@ -41,32 +41,32 @@ async function runTest() {
   console.log("\nSample Geocoded Details:");
   console.log(JSON.stringify(sampleGeocodedDetails, null, 2));
 
-  const safetyScore = calculateSafetyScore(sampleGeocodedDetails);
+  const safetyScore = await calculateSafetyScore(sampleGeocodedDetails);
 
   console.log("\n--- Safety Score Calculation Complete ---");
   console.log(`Final Safety Score: ${safetyScore.totalScore}`);
   console.log("Breakdown:", JSON.stringify(safetyScore.breakdown, null, 2));
   console.log("Summary:", JSON.stringify(safetyScore.summary, null, 2));
 
-  // Expected: Around 65 due to geofenced day averaging down.
-  if (safetyScore.totalScore === 65) {
+  // Expected: Around 63 due to geofenced day averaging down.
+  if (safetyScore.totalScore === 63) {
     console.log("\n✅ Test Result: SUCCESS - Score and breakdown correct.");
   } else {
-    console.log("\n❌ Test Result: FAILED - Expected 65.");
+    console.log("\n❌ Test Result: FAILED - Expected 63.");
   }
   const safeDetails = {
     days: [
       {
         day: 1,
-        location: "Eiffel Tower",
-        latitude: 48.8584,
-        longitude: 2.2945,
-      }, // +25 -> 125 -> 100
-      { day: 2, location: "Safe", latitude: 50.0, longitude: 10.0 }, // 100
+        location: "Safe Place 1",
+        latitude: 50.0,
+        longitude: 10.0,
+      }, // 100
+      { day: 2, location: "Safe Place 2", latitude: 51.0, longitude: 11.0 }, // 100
     ],
   };
 
-  const safeScore = calculateSafetyScore(safeDetails);
+  const safeScore = await calculateSafetyScore(safeDetails);
   console.log(`Safe Itinerary Score: ${safeScore.totalScore}`); // Expected: 100
 
   // Test risk itinerary
@@ -76,7 +76,7 @@ async function runTest() {
     ],
   };
 
-  const riskScore = calculateSafetyScore(riskDetails);
+  const riskScore = await calculateSafetyScore(riskDetails);
   console.log(`Risk Itinerary Score: ${riskScore.totalScore}`); // Expected: 60
 
   // Test geofenced
@@ -86,7 +86,7 @@ async function runTest() {
     ],
   };
 
-  const geoScore = calculateSafetyScore(geoDetails);
+  const geoScore = await calculateSafetyScore(geoDetails);
   console.log(`Geofenced Itinerary Score: ${geoScore.totalScore}`); // Expected: 0
 }
 

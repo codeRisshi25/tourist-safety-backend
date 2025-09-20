@@ -48,6 +48,10 @@ module.exports = (sequelize) => {
         allowNull: true,
         defaultValue: 100,
     },
+    safetyDetails: {
+        type: DataTypes.JSONB,
+        allowNull: true,
+    },
     isFirstTimeLogin: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

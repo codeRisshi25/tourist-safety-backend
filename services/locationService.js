@@ -1,13 +1,11 @@
-const { readJson } = require("../utils/jsonDb.js");
+const { Zone } = require('../models');
 const haversine = require("haversine-distance");
 
-const ZONES_FILE = "zones.json";
-
 // Calculate safety score based on circular zones
-function calculateSafetyScore(geocodedDetails) {
+async function calculateSafetyScore(geocodedDetails) {
   try {
-    const zones = readJson(ZONES_FILE) || [];
-    if (!Array.isArray(zones)) throw new Error("Invalid zones.json format");
+    const zones = await Zone.findAll();
+    if (!Array.isArray(zones)) throw new Error("Invalid zones data from database");
 
     let totalScore = 0;
     let dayCount = 0;
@@ -15,7 +13,7 @@ function calculateSafetyScore(geocodedDetails) {
     const breakdown = [];
     const geofencedDays = [];
     const highRiskRegions = [];
-    const touristPlaces = [];
+    const lowRiskRegions = [];
 
     for (const day of days) {
       if (!day.latitude || !day.longitude) continue; // Skip invalid geocodes
@@ -55,14 +53,14 @@ function calculateSafetyScore(geocodedDetails) {
               location: day.location,
               zone: zone.name,
             });
-          } else if (zone.type === "touristFriendly") {
-            dayScore += zone.penalty_bonus; // e.g., +25
+          } else if (zone.type === "lowRisk") {
+            dayScore += zone.penalty_bonus; // e.g., -10
             triggeredZones.push({
               zoneName: zone.name,
               type: zone.type,
-              effect: `Bonus ${zone.penalty_bonus} (tourist-friendly area)`,
+              effect: `Penalty ${zone.penalty_bonus} (low-risk area)`,
             });
-            touristPlaces.push({
+            lowRiskRegions.push({
               day: day.day,
               location: day.location,
               zone: zone.name,
@@ -96,7 +94,7 @@ function calculateSafetyScore(geocodedDetails) {
       summary: {
         geofencedDays,
         highRiskRegions,
-        touristPlaces,
+        lowRiskRegions,
       },
     };
   } catch (error) {
@@ -104,7 +102,7 @@ function calculateSafetyScore(geocodedDetails) {
     return {
       totalScore: 100,
       breakdown: [],
-      summary: { geofencedDays: [], highRiskRegions: [], touristPlaces: [] },
+      summary: { geofencedDays: [], highRiskRegions: [], lowRiskRegions: [] },
     }; // Fallback
   }
 }

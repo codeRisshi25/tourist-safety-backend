@@ -67,7 +67,7 @@ const registrationController = {
       const geocodedDetails = await geocodeItineraryDetails(itinerary.details);
 
       // Calculate safety score based on geocoded locations
-      const safetyScore = calculateSafetyScore(geocodedDetails);
+      const safetyScore = await calculateSafetyScore(geocodedDetails);
 
       const result = await db.sequelize.transaction(async (t) => {
         // 1. Create the tourist
@@ -81,6 +81,7 @@ const registrationController = {
             kycId,
             emergencyContact,
             safetyScore: safetyScore.totalScore, // Calculated safety score
+            safetyDetails: safetyScore, // Store full details
             isFirstTimeLogin: true,
           },
           { transaction: t }

@@ -10,5 +10,6 @@ router.post('/login', authController.login);
 router.post('/reset-password', authController.resetPassword);
 router.post('/logout', authController.logout);
 router.get('/profile', authenticateToken, authController.getProfile);
+router.get('/safety-details/:touristId', authenticateToken, authController.getSafetyDetails);
 
 module.exports = router;

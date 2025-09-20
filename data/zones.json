@@ -20,7 +20,7 @@
     "lat": 48.8584,
     "lng": 2.2945,
     "radius": 0.5,
-    "type": "touristFriendly",
-    "penalty_bonus": 25
+    "type": "lowRisk",
+    "penalty_bonus": -10
   }
 ]
