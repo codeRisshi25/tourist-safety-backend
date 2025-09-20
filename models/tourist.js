@@ -4,6 +4,10 @@ module.exports = (sequelize) => {
   class Tourist extends Model {
     static associate(models) {
       // define association here
+      Tourist.hasMany(models.Location, {
+        foreignKey: 'touristId',
+        as: 'locations'
+      });
     }
   }
   Tourist.init(

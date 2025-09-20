@@ -3,9 +3,9 @@
 // This teaches: DB insertion -> Fetching -> Itinerary matching -> Scoring
 
 const { Sequelize } = require("sequelize");
-const db = require("./models/index.js");
+const db = require("../models/index.js");
 const { Zone, Tourist } = db;
-const { calculateSafetyScore } = require("./services/locationService.js");
+const { calculateSafetyScore } = require("../services/locationService.js");
 
 // Step 1: Connect to DB and insert dummy zones (simulating police creation)
 async function insertDummyZones() {

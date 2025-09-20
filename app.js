@@ -19,7 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const apiRoutes = require('./routes/index.js');
+const authRoutes = require("./routes/authRoutes");
+const locationRoutes = require("./routes/locationRoutes");
+
 app.use('/api', apiRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/locations", locationRoutes);
 
 
 // Global Error Handler

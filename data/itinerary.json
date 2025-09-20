@@ -1,0 +1,45 @@
+{
+    "name": "Vahant Betu",
+    "phone": "8822327890",
+    "email": "vahantofficial12315@gmail.com",
+    "nationality": "British",
+    "kycId": "KYC987111",
+    "emergencyContact": "5557322",
+    "itinerary": {
+        "tripName": "Northeast Explorer",
+        "startDate": "2025-12-01",
+        "endDate": "2025-12-15",
+        "details": {
+            "days": [
+                {
+                    "day": 1,
+                    "location": "Paltan Bazaar, Guwahati",
+                    "notes": "Arrive in Guwahati, explore the market area.",
+                    "latitude": 26.1755,
+                    "longitude": 91.7538
+                },
+                {
+                    "day": 2,
+                    "location": "Police Bazar, Shillong",
+                    "notes": "Travel to Shillong, evening shopping.",
+                    "latitude": 25.5766,
+                    "longitude": 91.8827
+                },
+                {
+                    "day": 3,
+                    "location": "Dawki River, Meghalaya",
+                    "notes": "Day trip for boating.",
+                    "latitude": 25.1839,
+                    "longitude": 92.0155
+                },
+                {
+                    "day": 4,
+                    "location": "Kaziranga National Park",
+                    "notes": "Travel to Kaziranga for wildlife safari.",
+                    "latitude": 26.6676,
+                    "longitude": 93.3637
+                }
+            ]
+        }
+    }
+}

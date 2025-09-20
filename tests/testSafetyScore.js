@@ -1,5 +1,5 @@
 // testSafetyScore.js
-const { calculateSafetyScore } = require("./services/locationService.js");
+const { calculateSafetyScore } = require("../services/locationService.js");
 
 async function runTest() {
   console.log("--- Starting Safety Score Test ---");

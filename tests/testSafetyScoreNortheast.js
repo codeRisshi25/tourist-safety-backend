@@ -1,6 +1,6 @@
 // testSafetyScoreNortheast.js
 // Test script for safety score workflow with Northeast itinerary and dummy zones
-const { calculateSafetyScore } = require("./services/locationService.js");
+const { calculateSafetyScore } = require("../services/locationService.js");
 
 // SQL commands to insert dummy zones (run these in your DB before testing)
 // These add zones in the Northeast region for testing

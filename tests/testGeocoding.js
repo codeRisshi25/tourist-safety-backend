@@ -1,5 +1,5 @@
 // testGeocoding.js
-const { geocodeItineraryDetails } = require('./service/GeocodingService.js');
+const { geocodeItineraryDetails } = require('../service/GeocodingService.js');
 
 async function runTest() {
   console.log('--- Starting Geocoding Test ---');
