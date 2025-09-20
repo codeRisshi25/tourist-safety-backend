@@ -6,8 +6,9 @@ const {
   registerTouristOnBlockchain,
 } = require("../service/blockchainService.js");
 const { geocodeItineraryDetails } = require("../service/GeocodingService.js");
-const otpGenerator = require('otp-generator');
-const transporter = require('../config/mailer');
+const { calculateSafetyScore } = require("../services/locationService.js");
+const otpGenerator = require("otp-generator");
+const transporter = require("../config/mailer");
 
 const registrationController = {
   registerTourist: async (req, res, next) => {
@@ -65,6 +66,9 @@ const registrationController = {
       // --- MODIFIED: Geocode the itinerary details before the transaction ---
       const geocodedDetails = await geocodeItineraryDetails(itinerary.details);
 
+      // Calculate safety score based on geocoded locations
+      const safetyScore = calculateSafetyScore(geocodedDetails);
+
       const result = await db.sequelize.transaction(async (t) => {
         // 1. Create the tourist
         const tourist = await Tourist.create(
@@ -76,7 +80,7 @@ const registrationController = {
             nationality,
             kycId,
             emergencyContact,
-            safetyScore: 100, // Default safety score
+            safetyScore: safetyScore, // Calculated safety score
             isFirstTimeLogin: true,
           },
           { transaction: t }
@@ -111,9 +115,9 @@ const registrationController = {
         await transporter.sendMail({
           from: process.env.EMAIL_USER,
           to: email,
-          subject: 'Your One-Time Password for Tourist Safety App',
+          subject: "Your One-Time Password for Tourist Safety App",
           text: `Welcome to the Tourist Safety App! Your one-time password is: ${otp}`,
-          html: `<p>Welcome to the Tourist Safety App! Your one-time password is: <b>${otp}</b></p>`
+          html: `<p>Welcome to the Tourist Safety App! Your one-time password is: <b>${otp}</b></p>`,
         });
 
         return tourist;
@@ -121,7 +125,8 @@ const registrationController = {
 
       const { id } = result;
       return res.status(201).json({
-        message: "Tourist, itinerary, and blockchain ID created successfully. OTP sent to email.",
+        message:
+          "Tourist, itinerary, and blockchain ID created successfully. OTP sent to email.",
         touristId: id,
       });
     } catch (err) {
