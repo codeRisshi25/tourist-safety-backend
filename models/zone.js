@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Zone extends Model {
     /**
@@ -13,16 +11,19 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  Zone.init({
-    name: DataTypes.STRING,
-    lat: DataTypes.DECIMAL(10, 7),
-    lng: DataTypes.DECIMAL(10, 7),
-    radius: DataTypes.DECIMAL(5, 2),
-    type: DataTypes.ENUM('geofenced', 'highRisk', 'lowRisk'),
-    penalty_bonus: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'Zone',
-  });
+  Zone.init(
+    {
+      name: DataTypes.STRING,
+      lat: DataTypes.DECIMAL(10, 7),
+      lng: DataTypes.DECIMAL(10, 7),
+      radius: DataTypes.DECIMAL(5, 2),
+      type: DataTypes.ENUM("geofenced", "highRisk", "lowRisk"),
+      penalty_bonus: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "Zone",
+    }
+  );
   return Zone;
 };

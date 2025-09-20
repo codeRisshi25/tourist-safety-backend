@@ -1,11 +1,12 @@
-const { Zone } = require('../models');
+const { Zone } = require("../models");
 const haversine = require("haversine-distance");
 
 // Calculate safety score based on circular zones
 async function calculateSafetyScore(geocodedDetails) {
   try {
     const zones = await Zone.findAll();
-    if (!Array.isArray(zones)) throw new Error("Invalid zones data from database");
+    if (!Array.isArray(zones))
+      throw new Error("Invalid zones data from database");
 
     let totalScore = 0;
     let dayCount = 0;

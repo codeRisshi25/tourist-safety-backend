@@ -1,15 +1,15 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    await queryInterface.addColumn('tourists', 'safetyDetails', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.addColumn("tourists", "safetyDetails", {
       type: Sequelize.JSONB,
-      allowNull: true
+      allowNull: true,
     });
   },
 
-  async down (queryInterface, Sequelize) {
-    await queryInterface.removeColumn('tourists', 'safetyDetails');
-  }
+  async down(queryInterface, Sequelize) {
+    await queryInterface.removeColumn("tourists", "safetyDetails");
+  },
 };

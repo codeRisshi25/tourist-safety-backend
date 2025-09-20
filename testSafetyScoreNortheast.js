@@ -19,35 +19,35 @@ const northeastItinerary = {
     {
       day: 1,
       location: "Boston, MA",
-      latitude: 42.3601,  // Matches Boston Harbor Zone (highRisk, -50)
+      latitude: 42.3601, // Matches Boston Harbor Zone (highRisk, -50)
       longitude: -71.0589,
       notes: "Near harbor - high risk",
     },
     {
       day: 2,
       location: "New York City, NY",
-      latitude: 40.7128,  // Matches Downtown Crime Zone (highRisk, -40) and Manhattan Military Base (geofenced)
+      latitude: 40.7128, // Matches Downtown Crime Zone (highRisk, -40) and Manhattan Military Base (geofenced)
       longitude: -74.006,
       notes: "Downtown and military area",
     },
     {
       day: 3,
       location: "Philadelphia, PA",
-      latitude: 39.9526,  // Matches Philadelphia Downtown (lowRisk, -15)
+      latitude: 39.9526, // Matches Philadelphia Downtown (lowRisk, -15)
       longitude: -75.1652,
       notes: "City center - low risk",
     },
     {
       day: 4,
       location: "Albany, NY",
-      latitude: 42.6526,  // Matches Albany Safe Area (lowRisk, -5)
+      latitude: 42.6526, // Matches Albany Safe Area (lowRisk, -5)
       longitude: -73.7562,
       notes: "Capital area - low risk",
     },
     {
       day: 5,
       location: "Portland, ME",
-      latitude: 43.6591,  // No zone overlap - safe
+      latitude: 43.6591, // No zone overlap - safe
       longitude: -70.2568,
       notes: "Coastal town - no known zones",
     },
@@ -59,7 +59,9 @@ async function runNortheastTest() {
   console.log("Itinerary covers Boston, NYC, Philadelphia, Albany, Portland.");
   console.log("Expected overlaps:");
   console.log("- Day 1: Boston Harbor (highRisk, -50) -> dayScore = 50");
-  console.log("- Day 2: NYC Crime Zone (highRisk, -40) + Manhattan Military (geofenced) -> dayScore = 0");
+  console.log(
+    "- Day 2: NYC Crime Zone (highRisk, -40) + Manhattan Military (geofenced) -> dayScore = 0"
+  );
   console.log("- Day 3: Philadelphia Downtown (lowRisk, -15) -> dayScore = 85");
   console.log("- Day 4: Albany Safe (lowRisk, -5) -> dayScore = 95");
   console.log("- Day 5: No zones -> dayScore = 100");
@@ -70,9 +72,13 @@ async function runNortheastTest() {
   console.log("\n--- Calculation Complete ---");
   console.log(`Total Safety Score: ${safetyScore.totalScore}`);
   console.log("Breakdown:");
-  safetyScore.breakdown.forEach(day => {
-    console.log(`Day ${day.day} (${day.location}): ${day.dayScore} - ${day.triggeredZones.length} zones triggered`);
-    day.triggeredZones.forEach(zone => console.log(`  - ${zone.zoneName}: ${zone.effect}`));
+  safetyScore.breakdown.forEach((day) => {
+    console.log(
+      `Day ${day.day} (${day.location}): ${day.dayScore} - ${day.triggeredZones.length} zones triggered`
+    );
+    day.triggeredZones.forEach((zone) =>
+      console.log(`  - ${zone.zoneName}: ${zone.effect}`)
+    );
   });
   console.log("Summary:", JSON.stringify(safetyScore.summary, null, 2));
 
@@ -81,12 +87,16 @@ async function runNortheastTest() {
   if (safetyScore.totalScore === expectedScore) {
     console.log("\n✅ Test PASSED: Score matches expected 66.");
   } else {
-    console.log(`\n❌ Test FAILED: Expected 66, got ${safetyScore.totalScore}.`);
+    console.log(
+      `\n❌ Test FAILED: Expected 66, got ${safetyScore.totalScore}.`
+    );
   }
 
   // Check specific days
-  const day1Score = safetyScore.breakdown.find(d => d.day === 1).dayScore;
-  const day2Geofenced = safetyScore.breakdown.find(d => d.day === 2).isGeofenced;
+  const day1Score = safetyScore.breakdown.find((d) => d.day === 1).dayScore;
+  const day2Geofenced = safetyScore.breakdown.find(
+    (d) => d.day === 2
+  ).isGeofenced;
   if (day1Score === 50 && day2Geofenced) {
     console.log("✅ Day-specific checks PASSED.");
   } else {

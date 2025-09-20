@@ -2,20 +2,50 @@
 // Educational test: End-to-end safety score workflow
 // This teaches: DB insertion -> Fetching -> Itinerary matching -> Scoring
 
-const { Sequelize } = require('sequelize');
-const db = require('./models/index.js');
+const { Sequelize } = require("sequelize");
+const db = require("./models/index.js");
 const { Zone, Tourist } = db;
-const { calculateSafetyScore } = require('./services/locationService.js');
+const { calculateSafetyScore } = require("./services/locationService.js");
 
 // Step 1: Connect to DB and insert dummy zones (simulating police creation)
 async function insertDummyZones() {
-  console.log("Step 1: Inserting dummy zones into DB (like police would do)...");
+  console.log(
+    "Step 1: Inserting dummy zones into DB (like police would do)..."
+  );
   // These are the same dummy zones from before
   const dummyZones = [
-    { name: 'Boston Harbor Zone', lat: 42.3601, lng: -71.0589, radius: 1.0, type: 'highRisk', penalty_bonus: -50 },
-    { name: 'Philadelphia Downtown', lat: 39.9526, lng: -75.1652, radius: 0.8, type: 'lowRisk', penalty_bonus: -15 },
-    { name: 'Manhattan Military Base', lat: 40.7589, lng: -73.9851, radius: 2.5, type: 'geofenced', penalty_bonus: 0 },
-    { name: 'Albany Safe Area', lat: 42.6526, lng: -73.7562, radius: 1.2, type: 'lowRisk', penalty_bonus: -5 },
+    {
+      name: "Boston Harbor Zone",
+      lat: 42.3601,
+      lng: -71.0589,
+      radius: 1.0,
+      type: "highRisk",
+      penalty_bonus: -50,
+    },
+    {
+      name: "Philadelphia Downtown",
+      lat: 39.9526,
+      lng: -75.1652,
+      radius: 0.8,
+      type: "lowRisk",
+      penalty_bonus: -15,
+    },
+    {
+      name: "Manhattan Military Base",
+      lat: 40.7589,
+      lng: -73.9851,
+      radius: 2.5,
+      type: "geofenced",
+      penalty_bonus: 0,
+    },
+    {
+      name: "Albany Safe Area",
+      lat: 42.6526,
+      lng: -73.7562,
+      radius: 1.2,
+      type: "lowRisk",
+      penalty_bonus: -5,
+    },
   ];
 
   for (const zone of dummyZones) {
@@ -27,17 +57,41 @@ async function insertDummyZones() {
 
 // Step 2: Simulate user itinerary with locations that match zones
 function createMatchingItinerary() {
-  console.log("Step 2: Creating user itinerary with locations that match dummy zones...");
+  console.log(
+    "Step 2: Creating user itinerary with locations that match dummy zones..."
+  );
   const itinerary = {
     days: [
-      { day: 1, location: 'Boston, MA', latitude: 42.3601, longitude: -71.0589 }, // Matches Boston Harbor (highRisk)
-            { day: 2, location: 'New York City, NY', latitude: 40.7500, longitude: -73.9900 }, // Matches Manhattan Military Base (geofenced)
-      { day: 3, location: 'Philadelphia, PA', latitude: 39.9526, longitude: -75.1652 }, // Matches Philadelphia Downtown (lowRisk)
-      { day: 4, location: 'Albany, NY', latitude: 42.6526, longitude: -73.7562 }, // Matches Albany Safe (lowRisk)
-      { day: 5, location: 'Safe Town', latitude: 45.0, longitude: -90.0 }, // No match - safe
+      {
+        day: 1,
+        location: "Boston, MA",
+        latitude: 42.3601,
+        longitude: -71.0589,
+      }, // Matches Boston Harbor (highRisk)
+      {
+        day: 2,
+        location: "New York City, NY",
+        latitude: 40.75,
+        longitude: -73.99,
+      }, // Matches Manhattan Military Base (geofenced)
+      {
+        day: 3,
+        location: "Philadelphia, PA",
+        latitude: 39.9526,
+        longitude: -75.1652,
+      }, // Matches Philadelphia Downtown (lowRisk)
+      {
+        day: 4,
+        location: "Albany, NY",
+        latitude: 42.6526,
+        longitude: -73.7562,
+      }, // Matches Albany Safe (lowRisk)
+      { day: 5, location: "Safe Town", latitude: 45.0, longitude: -90.0 }, // No match - safe
     ],
   };
-  console.log("Itinerary created with 4/5 days matching zones (Day 2 now matches geofenced).\n");
+  console.log(
+    "Itinerary created with 4/5 days matching zones (Day 2 now matches geofenced).\n"
+  );
   return itinerary;
 }
 
@@ -53,10 +107,12 @@ async function calculateAndVerify(itinerary) {
   const result = await calculateSafetyScore(itinerary);
   console.log(`Calculated total score: ${result.totalScore}`);
   console.log("Breakdown:");
-  result.breakdown.forEach(day => {
+  result.breakdown.forEach((day) => {
     console.log(`  Day ${day.day} (${day.location}): Score ${day.dayScore}`);
     if (day.triggeredZones.length > 0) {
-      day.triggeredZones.forEach(z => console.log(`    - Triggered: ${z.zoneName} (${z.effect})`));
+      day.triggeredZones.forEach((z) =>
+        console.log(`    - Triggered: ${z.zoneName} (${z.effect})`)
+      );
     } else {
       console.log("    - No zones triggered");
     }
@@ -68,7 +124,9 @@ async function calculateAndVerify(itinerary) {
 
 // Step 4: Verify matches (educational assertions)
 function verifyResults(result) {
-  console.log("Step 4: Verifying that itinerary locations matched zones correctly...");
+  console.log(
+    "Step 4: Verifying that itinerary locations matched zones correctly..."
+  );
 
   const expectations = [
     { day: 1, expectedScore: 50, reason: "Boston Harbor highRisk (-50)" },
@@ -84,13 +142,17 @@ function verifyResults(result) {
     if (day.dayScore === exp.expectedScore) {
       console.log(`✅ Day ${day.day}: Correct (${exp.reason})`);
     } else {
-      console.log(`❌ Day ${day.day}: Expected ${exp.expectedScore}, got ${day.dayScore}`);
+      console.log(
+        `❌ Day ${day.day}: Expected ${exp.expectedScore}, got ${day.dayScore}`
+      );
       allCorrect = false;
     }
   });
 
   if (allCorrect) {
-    console.log("\n🎉 All matches verified! Data flows correctly: DB -> Fetch -> Match -> Score.");
+    console.log(
+      "\n🎉 All matches verified! Data flows correctly: DB -> Fetch -> Match -> Score."
+    );
   } else {
     console.log("\n⚠️ Some mismatches – check zone data or calculations.");
   }
@@ -101,14 +163,25 @@ function verifyResults(result) {
 // Step 5: Cleanup (optional)
 async function cleanup() {
   console.log("Step 5: Cleaning up dummy zones...");
-  await Zone.destroy({ where: { name: ['Boston Harbor Zone', 'Philadelphia Downtown', 'Manhattan Military Base', 'Albany Safe Area'] } });
+  await Zone.destroy({
+    where: {
+      name: [
+        "Boston Harbor Zone",
+        "Philadelphia Downtown",
+        "Manhattan Military Base",
+        "Albany Safe Area",
+      ],
+    },
+  });
   console.log("Dummy zones removed.\n");
 }
 
 // Main test runner
 async function runEndToEndTest() {
   try {
-    console.log("=== End-to-End Safety Score Test: Learning the Workflow ===\n");
+    console.log(
+      "=== End-to-End Safety Score Test: Learning the Workflow ===\n"
+    );
 
     await insertDummyZones();
     const itinerary = createMatchingItinerary();
@@ -118,7 +191,9 @@ async function runEndToEndTest() {
 
     console.log("=== Test Complete ===");
     if (success) {
-      console.log("✅ Workflow works: Police add zones -> User adds itinerary -> System matches & scores.");
+      console.log(
+        "✅ Workflow works: Police add zones -> User adds itinerary -> System matches & scores."
+      );
     } else {
       console.log("❌ Issues found – review DB or logic.");
     }
