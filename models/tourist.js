@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require("sequelize");
+const { Sequelize } = require(".");
 
 module.exports = (sequelize) => {
   class Tourist extends Model {
@@ -62,7 +63,11 @@ module.exports = (sequelize) => {
         defaultValue: true,
         allowNull: false,
       },
-
+      safetyStatus: {
+        type: DataTypes.ENUM("safe", "distress", "silent", "missing"),
+        defaultValue: "safe",
+        allowNull: false,
+      },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
